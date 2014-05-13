@@ -1,5 +1,3 @@
-var Tandem = require('tandem-core')
-
 var LINE_FORMATS = {
   'align': true
 };
@@ -148,15 +146,20 @@ DerbyQuill.prototype.getRangeLines = function(range) {
   return lines;
 };
 
-DerbyQuill.prototype.setRangeValue = function(range, value) {
-  var delta = Tandem.Delta.makeDelta({
-    startLength: this.quill.getLength()
+DerbyQuill.prototype.setRangeContents = function(range, value, attributes) {
+  var startLength = this.quill.getLength();
+  this.quill.setContents({
+    startLength: startLength
   , ops: [
       {start: 0, end: range.start}
-    , {value: value}
-    , {start: range.end, end: this.quill.getLength()}
+    , {value: value, attributes: attributes}
+    , {start: range.end, end: startLength}
     ]
   });
-  this.quill.updateContents(delta);
-  this.quill.setSelection(range.start + 1, range.start + 1);
+  var end = range.start + value.length;
+  if (range.isCollapsed()) {
+    this.quill.setSelection(end, end);
+  } else {
+    this.quill.setSelection(range.start, end);
+  }
 };

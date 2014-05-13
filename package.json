@@ -19,9 +19,7 @@
   "author": "Nate Smith",
   "license": "MIT",
   "dependencies": {
-    "tandem-core": "~0.5.2",
-    "quilljs": "^0.13.2",
-    "lodash": "~2.4.1"
+    "quilljs": "^0.13.2"
   },
   "devDependencies": {}
 }
