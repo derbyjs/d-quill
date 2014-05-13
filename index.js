@@ -37,6 +37,13 @@ DerbyQuill.prototype.create = function() {
     prepareFormat.call(quill, name, value);
     self.activeFormats.set(name, value);
   };
+  // Iframes will stop bubbling at their window, so re-dispatch all clicks
+  // that bubble to the top of the iframe document on the containing element.
+  // This is helpful for popups to figure out when they should close
+  this.dom.on('click', quill.root.ownerDocument, function(e) {
+    var event = new MouseEvent(e.type, e);
+    self.editor.dispatchEvent(event);
+  });
 };
 
 DerbyQuill.prototype.clearFormatting = function() {
