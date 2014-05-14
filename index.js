@@ -1,3 +1,5 @@
+var Range = require('quilljs/src/lib/range');
+
 var LINE_FORMATS = {
   'align': true
 };
@@ -169,4 +171,8 @@ DerbyQuill.prototype.setRangeContents = function(range, value, attributes) {
   } else {
     this.quill.setSelection(range.start, end);
   }
+};
+
+DerbyQuill.prototype.createRange = function(start, end) {
+  return new Range(start, end);
 };
