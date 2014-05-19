@@ -1,4 +1,4 @@
-var Range = require('quilljs/src/lib/range');
+var Range = require('quilljs/lib/lib/range');
 
 var LINE_FORMATS = {
   'align': true

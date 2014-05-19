@@ -19,7 +19,7 @@
   "author": "Nate Smith",
   "license": "MIT",
   "dependencies": {
-    "quilljs": "^0.13.2"
+    "quilljs": "^0.13.4"
   },
   "devDependencies": {}
 }
