@@ -18,6 +18,7 @@ DerbyQuill.prototype.view = __dirname;
 DerbyQuill.prototype.init = function() {
   this.quill = null;
   this.activeFormats = this.model.at('activeFormats');
+  this.value = this.model.at('value');
 };
 
 DerbyQuill.prototype.create = function() {
@@ -26,6 +27,8 @@ DerbyQuill.prototype.create = function() {
 
   var self = this;
   quill.on('text-change', function() {
+    self.value.set(quill.editor.innerHTML);
+    console.log(quill.editor.innerHTML);
     var range = quill.getSelection();
     self.updateActiveFormats(range);
   });
