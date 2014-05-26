@@ -1,7 +1,7 @@
 {
   "name": "d-quill",
   "description": "Derby rich text editor component based on Quill",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "index.js",
   "keywords": [
     "derby",
