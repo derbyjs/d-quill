@@ -28,7 +28,6 @@ DerbyQuill.prototype.create = function() {
   var self = this;
   quill.on('text-change', function() {
     self.value.set(quill.editor.innerHTML);
-    console.log(quill.editor.innerHTML);
     var range = quill.getSelection();
     self.updateActiveFormats(range);
   });
