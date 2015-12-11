@@ -1,4 +1,5 @@
-var Range = require('quilljs/lib/lib/range');
+var Quill = require('quill');
+var Range = Quill.require('range');
 
 var LINE_FORMATS = {
   'align': true
@@ -18,17 +19,19 @@ DerbyQuill.prototype.view = __dirname;
 DerbyQuill.prototype.init = function() {
   this.quill = null;
   this.activeFormats = this.model.at('activeFormats');
-  this.value = this.model.at('value');
+  this.delta = this.model.at('delta');
+  this.htmlValue = this.model.at('htmlValue');
 };
 
 DerbyQuill.prototype.create = function() {
-  var Quill = require('quilljs');
+  // TODO: remove this
+  window.Quill = Quill
   var quill = this.quill = new Quill(this.editor);
-
   var self = this;
   quill.on('text-change', function() {
-    self.value.set(quill.editor.innerHTML);
-    var range = quill.getSelection();
+    self.delta.setDiffDeep(quill.editor.doc.toDelta())
+    self.htmlValue.set(quill.getHTML());
+    var range = quill.getSelection(true);
     self.updateActiveFormats(range);
   });
   quill.on('selection-change', function(range) {
@@ -41,18 +44,19 @@ DerbyQuill.prototype.create = function() {
     prepareFormat.call(quill, name, value);
     self.activeFormats.set(name, value);
   };
-  // Iframes will stop bubbling at their window, so re-dispatch all clicks
-  // that bubble to the top of the iframe document on the containing element.
-  // This is helpful for popups to figure out when they should close
-  this.dom.on('click', quill.root.ownerDocument, function(e) {
-    var event = new MouseEvent(e.type, e);
-    self.editor.dispatchEvent(event);
-  });
+  // HACK: Quill added an `ignoreFocus` argument to Selection.getRange
+  // that defaults to false and doesn't expose a way of setting
+  // it to true from Quill.getSelection(). This will be rectified
+  // once the latest develop branch of Quill has been published
+  quill.getSelection = function(ignoreFocus) {
+    this.editor.checkUpdate();
+    return this.editor.selection.getRange(ignoreFocus);
+  }
 };
 
 DerbyQuill.prototype.clearFormatting = function() {
   this.quill.focus();
-  var range = this.quill.getSelection();
+  var range = this.quill.getSelection(true);
   var formats = this.getContainedFormats(range);
   for (type in formats) {
     this.setFormat(type, false);
@@ -66,7 +70,12 @@ DerbyQuill.prototype.toggleFormat = function(type) {
 
 DerbyQuill.prototype.setFormat = function(type, value) {
   this.quill.focus();
-  var range = this.quill.getSelection();
+  var range = this.quill.getSelection(true);
+  console.log('range', range)
+  if (!range) {
+    console.warn('User cursor is not in editor');
+    return
+  }
   if (range.isCollapsed()) {
     this.quill.prepareFormat(type, value);
   } else if (LINE_FORMATS[type]) {
