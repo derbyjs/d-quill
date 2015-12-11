@@ -20,7 +20,8 @@ DerbyQuill.prototype.init = function() {
   this.quill = null;
   this.activeFormats = this.model.at('activeFormats');
   this.delta = this.model.at('delta');
-  this.htmlValue = this.model.at('htmlValue');
+  this.markup = this.model.at('markup');
+  this.plainText = this.model.at('plainText');
 };
 
 DerbyQuill.prototype.create = function() {
@@ -29,14 +30,15 @@ DerbyQuill.prototype.create = function() {
   var quill = this.quill = new Quill(this.editor);
   var self = this;
 
-  this.model.on('change', 'delta.**', function(path, value, previous, passed) {
-    var delta = self.delta.getDeepCopy()
-    if (delta) self.quill.setContents(delta)
+  this.model.on('change', 'delta.**', function() {
+    var delta = self.delta.getDeepCopy();
+    if (delta) self.quill.setContents(delta);
   });
 
   quill.on('text-change', function() {
     self.delta.pass({source: quill}).setDiffDeep(quill.editor.doc.toDelta())
-    self.htmlValue.set(quill.getHTML());
+    self.markup.set(quill.getHTML());
+    self.plainText.set(quill.getText());
     var range = quill.getSelection(true);
     self.updateActiveFormats(range);
   });
