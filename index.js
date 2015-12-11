@@ -28,8 +28,14 @@ DerbyQuill.prototype.create = function() {
   window.Quill = Quill
   var quill = this.quill = new Quill(this.editor);
   var self = this;
+
+  this.model.on('change', 'delta.**', function(path, value, previous, passed) {
+    var delta = self.delta.getDeepCopy()
+    if (delta) self.quill.setContents(delta)
+  });
+
   quill.on('text-change', function() {
-    self.delta.setDiffDeep(quill.editor.doc.toDelta())
+    self.delta.pass({source: quill}).setDiffDeep(quill.editor.doc.toDelta())
     self.htmlValue.set(quill.getHTML());
     var range = quill.getSelection(true);
     self.updateActiveFormats(range);
