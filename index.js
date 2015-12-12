@@ -9,6 +9,7 @@ var BINARY_FORMATS = {
 , 'italic': true
 , 'strike': true
 , 'underline': true
+, 'link': true
 };
 var MIXED_FORMAT_VALUE = '*';
 
@@ -28,18 +29,25 @@ DerbyQuill.prototype.create = function() {
   // TODO: remove this
   window.Quill = Quill
   var quill = this.quill = new Quill(this.editor);
+  quill.addModule('toolbar', {
+    container: window.document.createElement('div')
+  });
+  window.toolbar = this.toolbar = quill.modules['toolbar']
   var self = this;
 
-  this.model.on('change', 'delta.**', function() {
+  this.model.on('change', 'delta.**', function(path, value, prev, passed) {
+    // This change originated from this component so we
+    // don't need to update ourselves
+    if (passed && passed.source == quill.id) return;
     var delta = self.delta.getDeepCopy();
     if (delta) self.quill.setContents(delta);
   });
 
   quill.on('text-change', function() {
-    self.delta.pass({source: quill}).setDiffDeep(quill.editor.doc.toDelta())
+    self.delta.pass({source: quill.id}).setDiffDeep(quill.editor.doc.toDelta())
     self.htmlResult.set(quill.getHTML());
     self.plainText.set(quill.getText());
-    var range = quill.getSelection(true);
+    var range = quill.getSelection();
     self.updateActiveFormats(range);
   });
   quill.on('selection-change', function(range) {
@@ -79,23 +87,15 @@ DerbyQuill.prototype.toggleFormat = function(type) {
 DerbyQuill.prototype.setFormat = function(type, value) {
   this.quill.focus();
   var range = this.quill.getSelection(true);
-  console.log('range', range)
-  if (!range) {
-    console.warn('User cursor is not in editor');
-    return
-  }
-  if (range.isCollapsed()) {
-    this.quill.prepareFormat(type, value);
-  } else if (LINE_FORMATS[type]) {
-    this.quill.formatLine(range, type, value, 'user');
-  } else {
-    this.quill.formatText(range, type, value, 'user');
-  }
+  this.toolbar._applyFormat(type, range, value);
+  this.delta.pass({source: this.quill.id}).set(this.quill.editor.doc.toDelta());
 };
 
 DerbyQuill.prototype.updateActiveFormats = function(range) {
-  if (!range) return;
-  var activeFormats = this.getActiveFormats(range);
+  var activeFormats = {}
+  if (range) {
+    activeFormats = this.getActiveFormats(range);
+  }
   this.activeFormats.set(activeFormats);
 };
 
@@ -106,7 +106,7 @@ DerbyQuill.prototype.getContainedFormats = function(range) {
 
 // Formats that span the entire range
 DerbyQuill.prototype.getActiveFormats = function(range) {
-  return this._getFormats(range, addActiveFormats);
+  return this.toolbar._getActive(range)
 };
 
 DerbyQuill.prototype._getFormats = function(range, addFn) {
@@ -127,34 +127,8 @@ function addContainedFormats(formats, items, key) {
   }
 }
 
-function addActiveFormats(formats, items, key) {
-  var counts = {};
-  for (var i = 0; i < items.length; i++) {
-    var itemFormats = items[i][key];
-    for (var type in itemFormats) {
-      if (counts[type]) {
-        counts[type]++;
-        if (formats[type] !== itemFormats[type]) {
-          formats[type] = MIXED_FORMAT_VALUE;
-        }
-      } else {
-        counts[type] = 1;
-        formats[type] = itemFormats[type];
-      }
-    }
-  }
-  for (var type in counts) {
-    if (counts[type] !== items.length) {
-      if (BINARY_FORMATS[type]) {
-        delete formats[type];
-      } else {
-        formats[type] = MIXED_FORMAT_VALUE;
-      }
-    }
-  }
-}
-
 DerbyQuill.prototype.getRangeContents = function(range) {
+  if (!range) return
   if (range.isCollapsed()) {
     var start = Math.max(0, range.start - 1);
     return this.quill.getContents(start, range.end);
@@ -172,24 +146,6 @@ DerbyQuill.prototype.getRangeLines = function(range) {
     line = line.next;
   }
   return lines;
-};
-
-DerbyQuill.prototype.setRangeContents = function(range, value, attributes) {
-  var startLength = this.quill.getLength();
-  this.quill.setContents({
-    startLength: startLength
-  , ops: [
-      {start: 0, end: range.start}
-    , {value: value, attributes: attributes}
-    , {start: range.end, end: startLength}
-    ]
-  });
-  var end = range.start + value.length;
-  if (range.isCollapsed()) {
-    this.quill.setSelection(end, end);
-  } else {
-    this.quill.setSelection(range.start, end);
-  }
 };
 
 DerbyQuill.prototype.createRange = function(start, end) {
