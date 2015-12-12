@@ -20,7 +20,7 @@ DerbyQuill.prototype.init = function() {
   this.quill = null;
   this.activeFormats = this.model.at('activeFormats');
   this.delta = this.model.at('delta');
-  this.markup = this.model.at('markup');
+  this.htmlResult = this.model.at('htmlResult');
   this.plainText = this.model.at('plainText');
 };
 
@@ -37,7 +37,7 @@ DerbyQuill.prototype.create = function() {
 
   quill.on('text-change', function() {
     self.delta.pass({source: quill}).setDiffDeep(quill.editor.doc.toDelta())
-    self.markup.set(quill.getHTML());
+    self.htmlResult.set(quill.getHTML());
     self.plainText.set(quill.getText());
     var range = quill.getSelection(true);
     self.updateActiveFormats(range);
