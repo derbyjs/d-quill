@@ -73,7 +73,7 @@ DerbyQuill.prototype.create = function() {
 
 DerbyQuill.prototype._updateDelta = function() {
   var pass = {source: this.quill.id};
-  this.delta.pass(pass).set(this.quill.editor.doc.toDelta());
+  this.delta.pass(pass).setDiffDeep(this.quill.editor.doc.toDelta());
 }
 
 DerbyQuill.prototype.clearFormatting = function() {
