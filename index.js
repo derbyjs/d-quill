@@ -1,5 +1,6 @@
 var Quill = require('quill');
 var Range = Quill.require('range');
+var dom = Quill.require('dom');
 
 var LINE_FORMATS = {
   'align': true
@@ -23,7 +24,10 @@ DerbyQuill.prototype.init = function() {
   this.delta = this.model.at('delta');
   this.htmlResult = this.model.at('htmlResult');
   this.plainText = this.model.at('plainText');
-  this._isPlaceholderActive = null
+  this.model.start('shouldShowPlaceholder', 'plainText', function(text) {
+    if (text === '\n') return true
+    return !text
+  });
 };
 
 DerbyQuill.prototype.create = function() {
@@ -37,7 +41,7 @@ DerbyQuill.prototype.create = function() {
   });
   window.toolbar = this.toolbar = quill.modules['toolbar']
   window.keyboard = this.keyboard = quill.modules['keyboard']
-  if (!this.delta.get()) this.setPlaceholder();
+  if (this.model.get('focus')) this.focus();
 
   // Bind Event listners
   this.model.on('all', 'delta.**', function(path, evtName, value, prev, passed) {
@@ -48,14 +52,15 @@ DerbyQuill.prototype.create = function() {
     if (delta) self.quill.setContents(delta);
   });
   quill.on('text-change', function(delta, source) {
-    if (source === 'user') self._updateDelta()
+    if (source === 'user') {
+      self._updateDelta()
+    }
     self.htmlResult.setDiff(quill.getHTML());
     self.plainText.setDiff(quill.getText());
     var range = quill.getSelection();
     self.updateActiveFormats(range);
   });
   quill.on('selection-change', function(range) {
-    if (self._isPlaceholderActive) self.clearPlaceholder();
     self.updateActiveFormats(range);
   });
   // HACK: Quill should provide an event here, but we wrap the method to
@@ -75,21 +80,11 @@ DerbyQuill.prototype.create = function() {
   }
 };
 
-DerbyQuill.prototype.setPlaceholder = function() {
-  placeholderText = this.model.get('placeholder');
-  if (!placeholderText) return;
-  this.quill.setText(placeholderText);
-  this._isPlaceholderActive = true
-}
-
-DerbyQuill.prototype.clearPlaceholder = function() {
-  this.quill.setText('');
-  this._isPlaceholderActive = false;
-}
-
 DerbyQuill.prototype._updateDelta = function() {
   var pass = {source: this.quill.id};
-  this.delta.pass(pass).setDiffDeep(this.quill.editor.doc.toDelta());
+  // TODO: Change to setDiffDeep once we figure out the error
+  // shown here: https://lever.slack.com/files/jon/F0GH44U74/screen_shot_2015-12-13_at_3.00.37_pm.png
+  this.delta.pass(pass).set(this.quill.editor.doc.toDelta());
 }
 
 DerbyQuill.prototype.clearFormatting = function() {
@@ -126,5 +121,8 @@ DerbyQuill.prototype.getActiveFormats = function(range) {
 };
 
 DerbyQuill.prototype.focus = function() {
-  this.quil.focus();
+  var end = this.quill.getLength()
+  if (end) {
+    this.quill.setSelection(end, end);
+  }
 }
