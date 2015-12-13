@@ -26,6 +26,7 @@ DerbyQuill.prototype.init = function() {
 };
 
 DerbyQuill.prototype.create = function() {
+  var self = this;
   // TODO: remove this
   window.Quill = Quill
   var quill = this.quill = new Quill(this.editor);
@@ -33,9 +34,9 @@ DerbyQuill.prototype.create = function() {
     container: window.document.createElement('div')
   });
   window.toolbar = this.toolbar = quill.modules['toolbar']
-  var self = this;
+  window.keyboard = this.keyboard = quill.modules['keyboard']
 
-  this.model.on('change', 'delta.**', function(path, value, prev, passed) {
+  this.model.on('all', 'delta.**', function(path, evtName, value, prev, passed) {
     // This change originated from this component so we
     // don't need to update ourselves
     if (passed && passed.source == quill.id) return;
@@ -43,10 +44,10 @@ DerbyQuill.prototype.create = function() {
     if (delta) self.quill.setContents(delta);
   });
 
-  quill.on('text-change', function() {
-    self.delta.pass({source: quill.id}).setDiffDeep(quill.editor.doc.toDelta())
-    self.htmlResult.set(quill.getHTML());
-    self.plainText.set(quill.getText());
+  quill.on('text-change', function(delta, source) {
+    if (source === 'user') self._updateDelta()
+    self.htmlResult.setDiff(quill.getHTML());
+    self.plainText.setDiff(quill.getText());
     var range = quill.getSelection();
     self.updateActiveFormats(range);
   });
@@ -70,10 +71,15 @@ DerbyQuill.prototype.create = function() {
   }
 };
 
+DerbyQuill.prototype._updateDelta = function() {
+  var pass = {source: this.quill.id};
+  this.delta.pass(pass).set(this.quill.editor.doc.toDelta());
+}
+
 DerbyQuill.prototype.clearFormatting = function() {
   this.quill.focus();
   var range = this.quill.getSelection(true);
-  var formats = this.getContainedFormats(range);
+  var formats = this.quill.editor.doc.formats
   for (type in formats) {
     this.setFormat(type, false);
   }
@@ -88,7 +94,6 @@ DerbyQuill.prototype.setFormat = function(type, value) {
   this.quill.focus();
   var range = this.quill.getSelection(true);
   this.toolbar._applyFormat(type, range, value);
-  this.delta.pass({source: this.quill.id}).set(this.quill.editor.doc.toDelta());
 };
 
 DerbyQuill.prototype.updateActiveFormats = function(range) {
@@ -99,55 +104,11 @@ DerbyQuill.prototype.updateActiveFormats = function(range) {
   this.activeFormats.set(activeFormats);
 };
 
-// Formats that are contained within part of the range
-DerbyQuill.prototype.getContainedFormats = function(range) {
-  return this._getFormats(range, addContainedFormats);
-};
-
 // Formats that span the entire range
 DerbyQuill.prototype.getActiveFormats = function(range) {
   return this.toolbar._getActive(range)
 };
 
-DerbyQuill.prototype._getFormats = function(range, addFn) {
-  var formats = {};
-  var ops = this.getRangeContents(range).ops;
-  var lines = this.getRangeLines(range);
-  addFn(formats, ops, 'attributes');
-  addFn(formats, lines, 'formats');
-  return formats;
-};
-
-function addContainedFormats(formats, items, key) {
-  for (var i = 0; i < items.length; i++) {
-    var itemFormats = items[i][key];
-    for (var type in itemFormats) {
-      formats[type] = true;
-    }
-  }
+DerbyQuill.prototype.focus = function() {
+  this.quil.focus();
 }
-
-DerbyQuill.prototype.getRangeContents = function(range) {
-  if (!range) return
-  if (range.isCollapsed()) {
-    var start = Math.max(0, range.start - 1);
-    return this.quill.getContents(start, range.end);
-  }
-  return this.quill.getContents(range);
-};
-
-DerbyQuill.prototype.getRangeLines = function(range) {
-  var line = this.quill.editor.doc.findLineAt(range.start)[0];
-  var lastLine = this.quill.editor.doc.findLineAt(range.end)[0];
-  var lines = [];
-  while (line) {
-    lines.push(line);
-    if (line === lastLine) break;
-    line = line.next;
-  }
-  return lines;
-};
-
-DerbyQuill.prototype.createRange = function(start, end) {
-  return new Range(start, end);
-};
