@@ -87,11 +87,11 @@ DerbyQuill.prototype.clearFormatting = function() {
 
 DerbyQuill.prototype.toggleFormat = function(type) {
   var value = !this.activeFormats.get(type);
+  this.quill.focus()
   this.setFormat(type, value);
 };
 
 DerbyQuill.prototype.setFormat = function(type, value) {
-  this.quill.focus();
   var range = this.quill.getSelection(true);
   this.toolbar._applyFormat(type, range, value);
 };
