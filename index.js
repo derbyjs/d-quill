@@ -23,19 +23,23 @@ DerbyQuill.prototype.init = function() {
   this.delta = this.model.at('delta');
   this.htmlResult = this.model.at('htmlResult');
   this.plainText = this.model.at('plainText');
+  this._isPlaceholderActive = null
 };
 
 DerbyQuill.prototype.create = function() {
   var self = this;
   // TODO: remove this
   window.Quill = Quill
+  // Setup quill and initalize referneces
   var quill = this.quill = new Quill(this.editor);
   quill.addModule('toolbar', {
     container: window.document.createElement('div')
   });
   window.toolbar = this.toolbar = quill.modules['toolbar']
   window.keyboard = this.keyboard = quill.modules['keyboard']
+  if (!this.delta.get()) this.setPlaceholder();
 
+  // Bind Event listners
   this.model.on('all', 'delta.**', function(path, evtName, value, prev, passed) {
     // This change originated from this component so we
     // don't need to update ourselves
@@ -43,7 +47,6 @@ DerbyQuill.prototype.create = function() {
     var delta = self.delta.getDeepCopy();
     if (delta) self.quill.setContents(delta);
   });
-
   quill.on('text-change', function(delta, source) {
     if (source === 'user') self._updateDelta()
     self.htmlResult.setDiff(quill.getHTML());
@@ -52,6 +55,7 @@ DerbyQuill.prototype.create = function() {
     self.updateActiveFormats(range);
   });
   quill.on('selection-change', function(range) {
+    if (self._isPlaceholderActive) self.clearPlaceholder();
     self.updateActiveFormats(range);
   });
   // HACK: Quill should provide an event here, but we wrap the method to
@@ -70,6 +74,18 @@ DerbyQuill.prototype.create = function() {
     return this.editor.selection.getRange(ignoreFocus);
   }
 };
+
+DerbyQuill.prototype.setPlaceholder = function() {
+  placeholderText = this.model.get('placeholder');
+  if (!placeholderText) return;
+  this.quill.setText(placeholderText);
+  this._isPlaceholderActive = true
+}
+
+DerbyQuill.prototype.clearPlaceholder = function() {
+  this.quill.setText('');
+  this._isPlaceholderActive = false;
+}
 
 DerbyQuill.prototype._updateDelta = function() {
   var pass = {source: this.quill.id};
