@@ -33,7 +33,8 @@ DerbyQuill.prototype.init = function() {
 DerbyQuill.prototype.create = function() {
   var self = this;
   // TODO: remove this
-  window.Quill = Quill
+  window.Quill = Quill;
+  window.dom = dom;
   // Setup quill and initalize referneces
   var quill = this.quill = new Quill(this.editor);
   quill.addModule('toolbar', {
@@ -105,8 +106,14 @@ DerbyQuill.prototype.toggleFormat = function(type) {
 
 DerbyQuill.prototype.setFormat = function(type, value) {
   this.quill.focus();
-  var range = this.quill.getSelection(true);
-  this.toolbar._applyFormat(type, range, value);
+  var self = this;
+  window.requestAnimationFrame(function() {
+    self.quill.focus();
+    var range = self.quill.getSelection(true);
+    console.log('applying format', type, range, value);
+    self.toolbar._applyFormat(type, range, value);
+    self.activeFormats.set(type, value);
+  });
 };
 
 DerbyQuill.prototype.updateActiveFormats = function(range) {
