@@ -24,9 +24,9 @@ DerbyQuill.prototype.init = function() {
   this.delta = this.model.at('delta');
   this.htmlResult = this.model.at('htmlResult');
   this.plainText = this.model.at('plainText');
-  this.model.start('shouldShowPlaceholder', 'plainText', function(text) {
-    if (text === '\n') return true
-    return !text
+  this.model.start('shouldShowPlaceholder', 'htmlResult', function(html) {
+    if (html === '<div><br></div>') return true
+    return !html
   });
 };
 
@@ -133,5 +133,13 @@ DerbyQuill.prototype.focus = function() {
   var end = this.quill.getLength()
   if (end) {
     this.quill.setSelection(end, end);
+    var range = this.quill.getSelection();
+    this.updateActiveFormats(range);
   }
+}
+
+DerbyQuill.prototype.isFocused = function() {
+  if (!this.quill) return false;
+  var range = this.quill.getSelection();
+  return !!range
 }
