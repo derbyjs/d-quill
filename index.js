@@ -143,3 +143,7 @@ DerbyQuill.prototype.isFocused = function() {
   var range = this.quill.getSelection();
   return !!range
 }
+
+DerbyQuill.prototype.setHTML = function(html) {
+  return this.quill.setHTML(html);
+}
