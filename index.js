@@ -62,6 +62,7 @@ DerbyQuill.prototype.create = function() {
     self.updateActiveFormats(range);
   });
   quill.on('selection-change', function(range) {
+    self.model.set('isFocused', !!range);
     self.updateActiveFormats(range);
   });
   // HACK: Quill should provide an event here, but we wrap the method to
