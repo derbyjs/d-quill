@@ -125,26 +125,23 @@ DerbyQuill.prototype.setFormat = function(type, value) {
   // causes some interesting focus events which
   // require us to wait until focus has properly
   // returned to the editor before actually applying
-  // the format
+  // the format.
   window.requestAnimationFrame(function() {
     self.quill.focus();
-    if (self.model.get('mode') === 'list') {
-      console.log('toggling format in list mode');
-      var previousRange = self.quill.getSelection(true);
-      var end = self.quill.getLength() || 0
-      self.quill.setSelection(0, end);
-      var range = self.quill.getSelection(true);
-      console.log('applying format', range, type, value);
-      self.toolbar._applyFormat(type, range, value);
-      self.activeFormats.set(type, value);
-      console.log('returning selection to', previousRange);
-      self.quill.setSelection(previousRange.start, previousRange.end);
+    var range;
+    // if we are in list mode and applying a list style, then
+    // we force the editor to apply that style to the entire
+    // contents of the editor
+    if (self.model.get('mode') === 'list' && (type === 'list' || type === 'bullet')) {
+      // console.log('toggling format in list mode');
+      var end = self.quill.getLength() || 0;
+      range = new Range(0, end);
     } else {
-      var range = self.quill.getSelection(true);
-      console.log('applying format', range, type, value);
-      self.toolbar._applyFormat(type, range, value);
-      self.activeFormats.set(type, value);
+      range = self.quill.getSelection(true);
     }
+    // console.log('applying format', range, type, value);
+    self.toolbar._applyFormat(type, range, value);
+    self.activeFormats.set(type, value);
   });
 };
 
