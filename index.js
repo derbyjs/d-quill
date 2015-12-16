@@ -46,13 +46,16 @@ DerbyQuill.prototype.create = function() {
 
   // Bind Event listners
   this.model.on('all', 'delta.**', function(path, evtName, value, prev, passed) {
-    // This change originated from this component so we
-    // don't need to update ourselves
-    if (passed && passed.source == quill.id) return;
+    // if a validate function has been provided, then
+    // we run it to ensure the contents of the editor
+    // meets the defined restrictions
     if (typeof self._validateDelta === 'function') {
       var isValid = self._validateDelta();
       if (!isValid) return self._updateDelta();
     }
+    // This change originated from this component so we
+    // don't need to update ourselves
+    if (passed && passed.source == quill.id) return;
     var delta = self.delta.getDeepCopy();
     if (delta) self.quill.setContents(delta);
   });
@@ -115,11 +118,30 @@ DerbyQuill.prototype.toggleFormat = function(type) {
 DerbyQuill.prototype.setFormat = function(type, value) {
   this.quill.focus();
   var self = this;
+  // HACK: Selecting an option from a dropdown
+  // causes some interesting focus events which
+  // require us to wait until focus has properly
+  // returned to the editor before actually applying
+  // the format
   window.requestAnimationFrame(function() {
     self.quill.focus();
-    var range = self.quill.getSelection(true);
-    self.toolbar._applyFormat(type, range, value);
-    self.activeFormats.set(type, value);
+    if (self.model.get('mode') === 'list') {
+      console.log('toggling format in list mode');
+      var previousRange = self.quill.getSelection(true);
+      var end = self.quill.getLength() || 0
+      self.quill.setSelection(0, end);
+      var range = self.quill.getSelection(true);
+      console.log('applying format', range, type, value);
+      self.toolbar._applyFormat(type, range, value);
+      self.activeFormats.set(type, value);
+      console.log('returning selection to', previousRange);
+      self.quill.setSelection(previousRange.start, previousRange.end);
+    } else {
+      var range = self.quill.getSelection(true);
+      console.log('applying format', range, type, value);
+      self.toolbar._applyFormat(type, range, value);
+      self.activeFormats.set(type, value);
+    }
   });
 };
 
