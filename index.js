@@ -48,11 +48,11 @@ DerbyQuill.prototype.create = function() {
   this.model.on('all', 'delta.**', function(path, evtName, value, prev, passed) {
     // This change originated from this component so we
     // don't need to update ourselves
+    if (passed && passed.source == quill.id) return;
     if (typeof self._validateDelta === 'function') {
       var isValid = self._validateDelta();
       if (!isValid) return self._updateDelta();
     }
-    if (passed && passed.source == quill.id) return;
     var delta = self.delta.getDeepCopy();
     if (delta) self.quill.setContents(delta);
   });
@@ -113,13 +113,11 @@ DerbyQuill.prototype.toggleFormat = function(type) {
 };
 
 DerbyQuill.prototype.setFormat = function(type, value) {
-  console.log('Setting format', type, value);
   this.quill.focus();
   var self = this;
   window.requestAnimationFrame(function() {
     self.quill.focus();
     var range = self.quill.getSelection(true);
-    console.log('applying format', type, range, value);
     self.toolbar._applyFormat(type, range, value);
     self.activeFormats.set(type, value);
   });
