@@ -48,13 +48,17 @@ DerbyQuill.prototype.create = function() {
   this.model.on('all', 'delta.**', function(path, evtName, value, prev, passed) {
     // This change originated from this component so we
     // don't need to update ourselves
+    if (typeof self._validateDelta === 'function') {
+      var isValid = self._validateDelta();
+      if (!isValid) return self._updateDelta();
+    }
     if (passed && passed.source == quill.id) return;
     var delta = self.delta.getDeepCopy();
     if (delta) self.quill.setContents(delta);
   });
   quill.on('text-change', function(delta, source) {
     if (source === 'user') {
-      self._updateDelta()
+      self._updateDelta();
     }
     self.htmlResult.setDiff(quill.getHTML());
     self.plainText.setDiff(quill.getText());
@@ -80,6 +84,9 @@ DerbyQuill.prototype.create = function() {
     this.editor.checkUpdate();
     return this.editor.selection.getRange(ignoreFocus);
   }
+
+  var delta = this.delta.getDeepCopy();
+  if (delta) quill.setContents(delta);
 };
 
 DerbyQuill.prototype._updateDelta = function() {
@@ -106,6 +113,7 @@ DerbyQuill.prototype.toggleFormat = function(type) {
 };
 
 DerbyQuill.prototype.setFormat = function(type, value) {
+  console.log('Setting format', type, value);
   this.quill.focus();
   var self = this;
   window.requestAnimationFrame(function() {
@@ -136,13 +144,8 @@ DerbyQuill.prototype.focus = function() {
     this.quill.setSelection(end, end);
     var range = this.quill.getSelection();
     this.updateActiveFormats(range);
+    this.model.set('isFocused', true);
   }
-}
-
-DerbyQuill.prototype.isFocused = function() {
-  if (!this.quill) return false;
-  var range = this.quill.getSelection();
-  return !!range
 }
 
 DerbyQuill.prototype.setHTML = function(html) {
