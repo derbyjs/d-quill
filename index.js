@@ -16,6 +16,9 @@ var MIXED_FORMAT_VALUE = '*';
 
 module.exports = DerbyQuill;
 function DerbyQuill() {}
+
+DerbyQuill.Range = Range
+
 DerbyQuill.prototype.view = __dirname;
 
 DerbyQuill.prototype.init = function() {
