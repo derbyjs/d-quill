@@ -118,8 +118,8 @@ DerbyQuill.prototype.toggleFormat = function(type) {
   this.setFormat(type, value);
 };
 
-DerbyQuill.prototype.setFormat = function(type, value) {
-  this.quill.focus();
+DerbyQuill.prototype.setFormat = function(type, value, isFocused) {
+  if (!isFocused) this.quill.focus();
   var self = this;
   // HACK: Selecting an option from a dropdown
   // causes some interesting focus events which
@@ -127,7 +127,7 @@ DerbyQuill.prototype.setFormat = function(type, value) {
   // returned to the editor before actually applying
   // the format.
   window.requestAnimationFrame(function() {
-    self.quill.focus();
+    if (!isFocused) self.quill.focus();
     var range;
     // if we are in list mode and applying a list style, then
     // we force the editor to apply that style to the entire
@@ -139,7 +139,7 @@ DerbyQuill.prototype.setFormat = function(type, value) {
     } else {
       range = self.quill.getSelection(true);
     }
-    // console.log('applying format', range, type, value);
+    console.log('applying format', range, type, value);
     self.toolbar._applyFormat(type, range, value);
     self.activeFormats.set(type, value);
   });
