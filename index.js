@@ -133,13 +133,11 @@ DerbyQuill.prototype.setFormat = function(type, value, isFocused) {
     // we force the editor to apply that style to the entire
     // contents of the editor
     if (self.model.get('mode') === 'list' && (type === 'list' || type === 'bullet')) {
-      // console.log('toggling format in list mode');
       var end = self.quill.getLength() || 0;
       range = new Range(0, end);
     } else {
       range = self.quill.getSelection(true);
     }
-    console.log('applying format', range, type, value);
     self.toolbar._applyFormat(type, range, value);
     self.activeFormats.set(type, value);
   });
