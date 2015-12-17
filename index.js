@@ -99,7 +99,7 @@ DerbyQuill.prototype._updateDelta = function() {
   var pass = {source: this.quill.id};
   // TODO: Change to setDiffDeep once we figure out the error
   // shown here: https://lever.slack.com/files/jon/F0GH44U74/screen_shot_2015-12-13_at_3.00.37_pm.png
-  this.delta.pass(pass).setDiffDeep(deepyCopy(this.quill.editor.doc.toDelta()));
+  this.delta.pass(pass).set(deepyCopy(this.quill.editor.doc.toDelta()));
 }
 
 DerbyQuill.prototype.clearFormatting = function() {
