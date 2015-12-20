@@ -135,6 +135,7 @@ DerbyQuill.prototype.setFormat = function(type, value, isFocused) {
     if (self.model.get('mode') === 'list' && (type === 'list' || type === 'bullet')) {
       var end = self.quill.getLength() || 0;
       range = new Range(0, end);
+      value = true
     } else {
       range = self.quill.getSelection(true);
     }
