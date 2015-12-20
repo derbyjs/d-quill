@@ -45,13 +45,6 @@ DerbyQuill.prototype.create = function() {
 
   // Bind Event listners
   this.model.on('all', 'delta.**', function(path, evtName, value, prev, passed) {
-    // if a validate function has been provided, then
-    // we run it to ensure the contents of the editor
-    // meets the defined restrictions
-    if (typeof self._validateDelta === 'function') {
-      var isValid = self._validateDelta();
-      if (!isValid) return self._updateDelta();
-    }
     // This change originated from this component so we
     // don't need to update ourselves
     if (passed && passed.source == quill.id) return;
