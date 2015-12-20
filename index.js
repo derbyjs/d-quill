@@ -41,8 +41,9 @@ DerbyQuill.prototype.create = function() {
   quill.addModule('toolbar', {
     container: window.document.createElement('div')
   });
+  this.toolbar = quill.modules['toolbar']
+  this.keyboard = quill.modules['keyboard']
   if (this.model.get('focus')) this.focus();
-
   // Bind Event listners
   this.model.on('all', 'delta.**', function(path, evtName, value, prev, passed) {
     // This change originated from this component so we
