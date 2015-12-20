@@ -36,15 +36,11 @@ DerbyQuill.prototype.init = function() {
 DerbyQuill.prototype.create = function() {
   var self = this;
   // TODO: remove this
-  window.Quill = Quill;
-  window.dom = dom;
   // Setup quill and initalize referneces
   var quill = this.quill = new Quill(this.editor);
   quill.addModule('toolbar', {
     container: window.document.createElement('div')
   });
-  window.toolbar = this.toolbar = quill.modules['toolbar']
-  window.keyboard = this.keyboard = quill.modules['keyboard']
   if (this.model.get('focus')) this.focus();
 
   // Bind Event listners
