@@ -26,7 +26,7 @@ DerbyQuill.prototype.init = function() {
   this.quill = null;
   this.activeFormats = this.model.at('activeFormats');
   this.delta = this.model.at('delta');
-  this.htmlValue = this.model.at('htmlValue');
+  this.initialHtml = this.model.at('initialHtml');
   this.htmlResult = this.model.at('htmlResult');
   this.plainText = this.model.at('plainText');
   this.model.start('shouldShowPlaceholder', 'htmlResult', function(html) {
@@ -84,11 +84,11 @@ DerbyQuill.prototype.create = function() {
   }
 
   var delta = this.delta.getDeepCopy();
-  var htmlValue = this.htmlValue.get();
+  var initialHtml = this.initialHtml.get();
   if (delta) {
     quill.setContents(delta);
-  } else if (htmlValue) {
-    this.setHTML(htmlValue);
+  } else if (initialHtml) {
+    this.setHTML(initialHtml);
     this._updateDelta();
   }
 };
