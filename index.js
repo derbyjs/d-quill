@@ -17,6 +17,7 @@ var MIXED_FORMAT_VALUE = '*';
 module.exports = DerbyQuill;
 function DerbyQuill() {}
 
+DerbyQuill.Quill = Quill
 DerbyQuill.Range = Range
 
 DerbyQuill.prototype.view = __dirname;
@@ -88,6 +89,7 @@ DerbyQuill.prototype.create = function() {
     quill.setContents(delta);
   } else if (htmlValue) {
     this.setHTML(htmlValue);
+    this._updateDelta();
   }
 };
 
