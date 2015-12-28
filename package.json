@@ -11,10 +11,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/codeparty/d-quill.git"
+    "url": "git://github.com/derbyjs/d-quill.git"
   },
   "bugs": {
-    "url": "https://github.com/codeparty/d-quill/issues"
+    "url": "https://github.com/derbyjs/d-quill/issues"
   },
   "author": "Nate Smith",
   "license": "MIT",
