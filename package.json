@@ -16,10 +16,19 @@
   "bugs": {
     "url": "https://github.com/derbyjs/d-quill/issues"
   },
-  "author": "Nate Smith",
+  "author": {
+    "name": "Nate Smith"
+  },
   "license": "MIT",
   "dependencies": {
-    "quilljs": "^0.13.4"
+    "quilljs": "0.13.7"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "readme": "d-quill\n=======\n\nDerby rich text editor component based on Quill\n",
+  "readmeFilename": "README.md",
+  "homepage": "https://github.com/codeparty/d-quill",
+  "_id": "d-quill@0.0.3",
+  "_shasum": "5b96c03109e395aa9dfdf13d170db04bd82f80ef",
+  "_from": "d-quill@*",
+  "_resolved": "https://registry.npmjs.org/d-quill/-/d-quill-0.0.3.tgz"
 }
