@@ -103,12 +103,22 @@ DerbyQuill.prototype._updateDelta = function() {
 DerbyQuill.prototype.clearFormatting = function() {
   this.quill.focus();
   var range = this.quill.getSelection(true);
-  var formats = this.quill.editor.doc.formats;
-  for (type in formats) {
+  var lineFormats = this.toolbar._getLineActive(range);
+  var formats = {};
+  if (range.isCollapsed()) {
+    formats = this.getActiveFormats(range);
+  } else {
+    formats = this.quill.editor.doc.formats;
+  }
+  for (var lineType in lineFormats) {
+    this.toolbar._applyFormat(type, range, false);
+  }
+  for (var type in formats) {
     // We don't use setFormat here because we want to avoid
     // focusing the editor for each format
     this.toolbar._applyFormat(type, range, false);
   }
+  this.updateActiveFormats();
 };
 
 DerbyQuill.prototype.toggleFormat = function(type) {
