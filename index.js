@@ -42,9 +42,13 @@ DerbyQuill.prototype.create = function() {
 
   // Fix how keyboard hotkeys affect toolbar buttons
   var hotkeyToggleFormat = function(format) {
-    return function() {
+    return function(range) {
       var newValue = !self.activeFormats.get(format);
-      quill.prepareFormat(format, newValue);
+      if (range.isCollapsed()) {
+        quill.prepareFormat(format, newValue);
+      } else {
+        self.toolbar._applyFormat(format, range, newValue);
+      }
       return false;
     };
   };
