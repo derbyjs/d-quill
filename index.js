@@ -40,6 +40,23 @@ DerbyQuill.prototype.create = function() {
   this.keyboard = quill.modules['keyboard'];
   if (this.model.get('focus')) this.focus();
 
+  // Fix how keyboard hotkeys affect toolbar buttons
+  var hotkeyToggleFormat = function(format) {
+    return function() {
+      var newValue = !self.activeFormats.get(format);
+      quill.prepareFormat(format, newValue);
+      return false;
+    };
+  };
+  var fixHotkey = function(key, format) {
+    var keyCode = key.toUpperCase().charCodeAt(0);
+    self.keyboard.hotkeys[keyCode] = [];
+    self.keyboard.addHotkey({key: keyCode, metaKey: true}, hotkeyToggleFormat(format));
+  };
+  fixHotkey('B', 'bold');
+  fixHotkey('I', 'italic');
+  fixHotkey('U', 'underline');
+
   // Bind Event listners
   this.model.on('all', 'delta.**', function(path, evtName, value, prev, passed) {
     // This change originated from this component so we
