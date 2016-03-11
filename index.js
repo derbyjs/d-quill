@@ -1,4 +1,4 @@
-var Quill = require('quill');
+var Quill = require('lever-quill');
 var Range = Quill.require('range');
 var dom = Quill.require('dom');
 
