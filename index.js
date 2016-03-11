@@ -17,6 +17,7 @@ DerbyQuill.prototype.init = function() {
   this.initialHtml = this.model.at('initialHtml');
   this.htmlResult = this.model.at('htmlResult');
   this.plainText = this.model.at('plainText');
+  this.emptyRange = new Range(0,0);
   this.model.start('shouldShowPlaceholder', 'htmlResult', function(html) {
     if (html === '<div><br></div>') return true;
     return !html;
@@ -100,7 +101,10 @@ DerbyQuill.prototype.create = function() {
   // once the latest develop branch of Quill has been published
   quill.getSelection = function(ignoreFocus) {
     this.editor.checkUpdate();
-    return this.editor.selection.getRange(ignoreFocus);
+    // we return the empty range as a fallback because quill does not deal with
+    // being passed null as a selection well, and getSelection can return null
+    // in some cases, resulting in an error
+    return this.editor.selection.getRange(ignoreFocus) || this.emptyRange;
   };
 
   var delta = this.delta.getDeepCopy();
