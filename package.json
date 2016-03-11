@@ -19,7 +19,7 @@
   "author": "Nate Smith",
   "license": "MIT",
   "dependencies": {
-    "lever-quill": "^1.0.0"
+    "lever-quill": "^1.1.0"
   },
   "devDependencies": {}
 }
