@@ -83,7 +83,7 @@ DerbyQuill.prototype.create = function() {
   });
 
   quill.on('selection-change', function(range) {
-    self.model.set('isFocused', !!range);
+    self.model.set('editorFocused', !!range);
     self.updateActiveFormats(range);
   });
 
@@ -151,8 +151,8 @@ DerbyQuill.prototype.toggleFormat = function(type) {
   this.setFormat(type, value);
 };
 
-DerbyQuill.prototype.setFormat = function(type, value, isFocused) {
-  if (!isFocused) this.quill.focus();
+DerbyQuill.prototype.setFormat = function(type, value, editorFocused) {
+  if (!editorFocused) this.quill.focus();
   var self = this;
 
   // HACK: Selecting an option from a dropdown
@@ -161,7 +161,7 @@ DerbyQuill.prototype.setFormat = function(type, value, isFocused) {
   // returned to the editor before actually applying
   // the format.
   window.requestAnimationFrame(function() {
-    if (!isFocused) self.quill.focus();
+    if (!editorFocused) self.quill.focus();
     var range;
 
     // if we are in list mode and applying a list style, then
@@ -200,7 +200,7 @@ DerbyQuill.prototype.focus = function() {
     this.quill.setSelection(end, end);
     var range = this.quill.getSelection();
     this.updateActiveFormats(range);
-    this.model.set('isFocused', true);
+    this.model.set('editorFocused', true);
   }
 };
 
